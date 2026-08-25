@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VOYX – Sales Dashboard</title>
+  <meta name="description" content="VOYX eSIM & SIM Sales Intelligence Dashboard – real-time orders, revenue, agent leaderboard and destination analytics." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()" aria-hidden="true"></div>
+  
+  <!-- ── SIDEBAR ─ -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <span class="logo-icon">⚡</span>
+    <span class="logo-text">VOYX</span>
+  </div>
+
+  <nav class="sidebar-nav">
+    <a href="#" class="nav-item active" id="nav-dashboard" onclick="return switchTab('dashboard', this)">
+      <svg viewBox="0 0 24 24"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
+      <span>Dashboard</span>
+    </a>
+    <a href="#" class="nav-item" id="nav-market" onclick="return switchTab('market', this)">
+      <svg viewBox="0 0 24 24"><path d="M3.5 18.49l6-6.01 4 4L22 6.92l-1.41-1.41-7.09 7.97-4-4L2 16.99z"/></svg>
+      <span>Market Summary</span>
+    </a>
+    <a href="#" class="nav-item" id="nav-leaderboard" onclick="return switchTab('leaderboard', this)">
+      <svg viewBox="0 0 24 24"><path d="M11 7H6l-4 5 4 5h5v4h2v-4h2l4-5-4-5h-2V3h-2v4zM7.83 10L5.5 12l2.33 2H11v-4H7.83zM16.17 10H13v4h3.17L18.5 12l-2.33-2z"/></svg>
+      <span>Leaderboard</span>
+    </a>
+    <a href="#" class="nav-item" id="nav-agents" onclick="return switchTab('agents', this)">
+      <svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
+      <span>Agent Cards</span>
+    </a>
+  </nav>
+
+  <div class="sidebar-footer">
+    <button class="btn-download" id="btn-csv" onclick="downloadCSV()">
+      <svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+      Download CSV
+    </button>
+  </div>
+</aside>
+
+<!-- ── MAIN ── -->
+<main class="main" id="main">
+
+  <!-- TOPBAR -->
+  <header class="topbar">
+    <div class="topbar-row">
+    <button class="menu-toggle" type="button" onclick="toggleSidebar()" aria-label="Open menu">
+      <svg viewBox="0 0 24 24"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>
+    </button>
+
+    <div class="topbar-brand-mobile">
+        <span class="logo-icon">⚡</span>
+        <span class="logo-text">VOYX</span>
+      </div>
+      
+      <div class="topbar-right">
+        <div class="status-dot" id="status-dot" title="Data status"></div>
+        <span class="status-label" id="status-label">Loading…</span>
+        <div class="avatar" title="Admin">A</div>
+      </div>
+    </div>
+      
+    <div class="topbar-center">
+      <div class="date-picker-wrap">
+        <svg viewBox="0 0 24 24" class="cal-icon"><path d="M20 3h-1V1h-2v2H7V1H5v2H4c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 18H4V8h16v13z"/></svg>
+        <span class="date-label">Report Date:</span>
+        <input type="date" id="report-date" class="date-input" onchange="onDateChange(this.value)" />
+        <button class="btn-load" id="btn-load" type="button" onclick="loadDashboard()">
+          <svg viewBox="0 0 24 24"><path d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0 1 12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
+          <span class="btn-load-text">Load</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ══ DASHBOARD TAB ══ -->
+  <section class="tab-content active" id="tab-dashboard">
+
+    <!-- KPI CARDS — 4 metrics matching SQL -->
+    <div class="kpi-grid">
+
+      <div class="kpi-card kpi-orange">
+        <div class="kpi-top">
+          <div class="kpi-label">Today's Sales</div>
+          <div class="kpi-icon">🛒</div>
+        </div>
+        <div class="kpi-value" id="kpi-today-sales">–</div>
+        <div class="kpi-rev" id="kpi-today-rev">₹ –</div>
+        <div class="kpi-tag">Orders today</div>
+      </div>
+
+      <div class="kpi-card kpi-blue">
+        <div class="kpi-top">
+          <div class="kpi-label">MTD Sales</div>
+          <div class="kpi-icon">📅</div>
+        </div>
+        <div class="kpi-value" id="kpi-mtd-sales">–</div>
+        <div class="kpi-rev" id="kpi-mtd-rev">₹ –</div>
+        <div class="kpi-tag">Month-to-Date</div>
+      </div>
+
+      <div class="kpi-card kpi-purple">
+        <div class="kpi-top">
+          <div class="kpi-label">Prev Month Same Day</div>
+          <div class="kpi-icon">📆</div>
+        </div>
+        <div class="kpi-value" id="kpi-pmsd-sales">–</div>
+        <div class="kpi-rev" id="kpi-pmsd-rev">₹ –</div>
+        <div class="kpi-tag">PMSD comparison</div>
+      </div>
+
+      <div class="kpi-card kpi-green">
+        <div class="kpi-top">
+          <div class="kpi-label">Prev Month Total</div>
+          <div class="kpi-icon">🗓️</div>
+        </div>
+        <div class="kpi-value" id="kpi-pm-sales">–</div>
+        <div class="kpi-rev" id="kpi-pm-rev">₹ –</div>
+        <div class="kpi-tag">Full previous month</div>
+      </div>
+
+    </div>
+
+    <!-- CHARTS ROW -->
+    <div class="charts-grid">
+      <div class="card chart-card">
+        <div class="card-header">
+          <h2 class="card-title">
+            <svg viewBox="0 0 24 24"><path d="M3.5 18.49l6-6.01 4 4L22 6.92l-1.41-1.41-7.09 7.97-4-4L2 16.99z"/></svg>
+            Daily Summary
+          </h2>
+          <div class="chart-legend">
+            <span class="legend-dot" style="background:#f97316"></span><span>Orders</span>
+            <span class="legend-dot" style="background:#6366f1"></span><span>Revenue</span>
+          </div>
+        </div>
+        <div class="chart-container">
+          <canvas id="dailyChart"></canvas>
+        </div>
+      </div>
+
+      <div class="card chart-card">
+        <div class="card-header">
+          <h2 class="card-title">
+            <svg viewBox="0 0 24 24"><path d="M5 9.2h3V19H5zM10.6 5h2.8v14h-2.8zm5.6 8H19v6h-2.8z"/></svg>
+            Monthly Summary
+          </h2>
+          <div class="chart-legend">
+            <span class="legend-dot" style="background:#f97316"></span><span>Orders</span>
+          </div>
+        </div>
+        <div class="chart-container">
+          <canvas id="monthlyChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- LEADERBOARD PREVIEW on Dashboard -->
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title">
+          <svg viewBox="0 0 24 24"><path d="M11 7H6l-4 5 4 5h5v4h2v-4h2l4-5-4-5h-2V3h-2v4z"/></svg>
+          Agent Leaderboard — <span id="lb-date-label" class="card-title-sub">Today vs MTD</span>
+        </h2>
+        <div class="card-actions">
+          <input class="mini-search" type="text" id="agent-filter-dash" placeholder="Filter agent…" oninput="filterLeaderboard('agent-filter-dash','lb-tbody')" />
+        </div>
+      </div>
+      <div class="table-wrapper">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Agent Name</th>
+              <th>Today Sales</th>
+              <th>Today Revenue (₹)</th>
+              <th>MTD Sales</th>
+              <th>MTD Revenue (₹)</th>
+              <th>MTD Share</th>
+            </tr>
+          </thead>
+          <tbody id="lb-tbody">
+            <tr><td colspan="7" class="loading-cell"><span class="spinner"></span> Loading…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- ══ MARKET SUMMARY TAB ═\ -->
+  <section class="tab-content" id="tab-market">
+    <div class="page-header">
+      <h1>Market Summary</h1>
+      <p id="market-sub">Monthly and daily performance overview</p>
+    </div>
+
+    <!-- Month-over-month comparison cards -->
+    <div class="kpi-grid">
+      <div class="kpi-card kpi-orange">
+        <div class="kpi-top"><div class="kpi-label">MTD vs PMSD</div><div class="kpi-icon">📈</div></div>
+        <div class="kpi-value" id="ms-growth-pct">–</div>
+        <div class="kpi-rev" id="ms-growth-label">Sales growth</div>
+        <div class="kpi-tag">vs prev month same day</div>
+      </div>
+      <div class="kpi-card kpi-blue">
+        <div class="kpi-top"><div class="kpi-label">Best Day (MTD)</div><div class="kpi-icon">🏆</div></div>
+        <div class="kpi-value" id="ms-best-day-cnt">–</div>
+        <div class="kpi-rev" id="ms-best-day-date">–</div>
+        <div class="kpi-tag">Highest orders in month</div>
+      </div>
+      <div class="kpi-card kpi-purple">
+        <div class="kpi-top"><div class="kpi-label">Avg Daily Orders</div><div class="kpi-icon">📊</div></div>
+        <div class="kpi-value" id="ms-avg-daily">–</div>
+        <div class="kpi-rev" id="ms-avg-rev">₹ – avg revenue</div>
+        <div class="kpi-tag">This month average</div>
+      </div>
+      <div class="kpi-card kpi-green">
+        <div class="kpi-top"><div class="kpi-label">MTD Revenue</div><div class="kpi-icon">💰</div></div>
+        <div class="kpi-value" id="ms-mtd-rev-big">–</div>
+        <div class="kpi-rev" id="ms-pm-rev-small">PM: ₹ –</div>
+        <div class="kpi-tag">Month-to-date revenue</div>
+      </div>
+    </div>
+
+    <div class="charts-grid">
+      <div class="card chart-card chart-card-wide">
+        <div class="card-header">
+          <h2 class="card-title">
+            <svg viewBox="0 0 24 24"><path d="M5 9.2h3V19H5zM10.6 5h2.8v14h-2.8zm5.6 8H19v6h-2.8z"/></svg>
+            Monthly Orders Trend
+          </h2>
+        </div>
+        <div class="chart-container chart-container-tall">
+          <canvas id="monthlyTrendChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="card card-spaced">
+      <div class="card-header">
+        <h2 class="card-title">
+          <svg viewBox="0 0 24 24"><path d="M3.5 18.49l6-6.01 4 4L22 6.92l-1.41-1.41-7.09 7.97-4-4L2 16.99z"/></svg>
+          Daily Breakdown — Current Month
+        </h2>
+      </div>
+      <div class="table-wrapper">
+        <table class="data-table">
+          <thead>
+            <tr><th>Date</th><th>Orders</th><th>Revenue (₹)</th><th>Avg Order (₹)</th></tr>
+          </thead>
+          <tbody id="daily-table-body">
+            <tr><td colspan="4" class="loading-cell"><span class="spinner"></span> Loading…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ LEADERBOARD TAB ══-->
+  <section class="tab-content" id="tab-leaderboard">
+    <div class="page-header">
+      <h1>Agent Leaderboard</h1>
+      <p id="lb-tab-sub">Today vs MTD performance ranked by MTD sales</p>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title">
+          <svg viewBox="0 0 24 24"><path d="M11 7H6l-4 5 4 5h5v4h2v-4h2l4-5-4-5h-2V3h-2v4z"/></svg>
+          Direct Sales Leaderboard
+        </h2>
+        <div class="card-actions">
+          <input class="mini-search" type="text" id="agent-filter-tab" placeholder="Filter agent…" oninput="filterLeaderboard('agent-filter-tab','lb-full-tbody')" />
+        </div>
+      </div>
+      <div class="table-wrapper">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Agent Name</th>
+              <th>Today Sales</th>
+              <th>Today Revenue (₹)</th>
+              <th>MTD Sales</th>
+              <th>MTD Revenue (₹)</th>
+              <th>MTD Share</th>
+            </tr>
+          </thead>
+          <tbody id="lb-full-tbody">
+            <tr><td colspan="7" class="loading-cell"><span class="spinner"></span> Loading…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ AGENT CARDS TAB ══ -->
+  <section class="tab-content" id="tab-agents">
+    <div class="page-header">
+      <h1>Agent Performance Cards</h1>
+      <p id="agent-cards-sub">Individual performance breakdown</p>
+    </div>
+    <div class="agent-cards-grid" id="agent-cards-grid">
+      <div class="loading-cell" style="grid-column:1/-1;padding:40px;text-align:center">
+        <span class="spinner"></span> Loading agent cards…
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+<script src="env.js"></script>
+<script src="config.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
